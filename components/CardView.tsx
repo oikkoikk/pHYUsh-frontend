@@ -29,6 +29,11 @@ const CardView = () => {
     jehanInwon: "42/42",
   };
   const bellRef = React.useRef() as React.MutableRefObject<LottieView>;
+  const [subscribed, setSubscribed] = React.useState(false);
+
+  React.useEffect(() => {
+    if (subscribed) bellRef.current.play(0, 100);
+  }, [subscribed]);
 
   return (
     <Pressable style={{ ...styles.container, backgroundColor: Colors[colorScheme].gray01 }}>
@@ -41,13 +46,29 @@ const CardView = () => {
       <View style={styles.container_detail2}>
         <Text style={styles.text_detail2}>{`${mockupData.hakjeom}학점`}</Text>
       </View>
-      <LottieView
-        ref={bellRef}
-        autoPlay={false}
-        loop={false}
-        source={require("../assets/lotties/bell_disabled.json")}
-        style={styles.bell}
-      />
+      <Pressable
+        onPress={() => {
+          setSubscribed(!subscribed);
+        }}
+        style={{ ...styles.container_bell, backgroundColor: Colors[colorScheme].gray02 }}
+      >
+        {!subscribed ? (
+          <LottieView
+            autoPlay={false}
+            loop={false}
+            source={require("../assets/lotties/bell_disabled.json")}
+            style={styles.bell}
+          />
+        ) : (
+          <LottieView
+            ref={bellRef}
+            autoPlay={false}
+            loop={false}
+            source={require("../assets/lotties/bell.json")}
+            style={styles.bell}
+          />
+        )}
+      </Pressable>
     </Pressable>
   );
 };
@@ -61,7 +82,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   container_title: {
-    minHeight: 20,
+    height: 20,
     width: Layout.window.width - 50,
     marginTop: 12,
     backgroundColor: "transparent",
@@ -97,9 +118,17 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontSize: 15,
   },
+  container_bell: {
+    position: "absolute",
+    top: 32,
+    right: 15,
+    borderRadius: 13,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   bell: {
-    width: 80,
-    height: 40,
+    width: 45,
+    height: 45,
   },
 });
 
