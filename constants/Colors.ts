@@ -1,19 +1,27 @@
-const tintColorLight = '#2f95dc';
-const tintColorDark = '#fff';
+const tintColorLight = "#0E4A84"; //Hanyang Blue
+const tintColorDark = "#FAFAFA";
 
 export default {
   light: {
-    text: '#000',
-    background: '#fff',
+    text: "#000",
+    seperator: "#F5F5F5",
+    background: "#FFFFFF",
+    gray01: "#F7F8F9",
+    gray02: "#E9EBEE",
+    gray03: "#C5C8CE",
     tint: tintColorLight,
-    tabIconDefault: '#ccc',
+    tabIconDefault: "#CCCCCC",
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#fff',
-    background: '#000',
+    text: "#FAFAFA",
+    seperator: "#1f2023",
+    background: "#17171B",
+    gray01: "#262626",
+    gray02: "#3C3C3C",
+    gray03: "#28323C",
     tint: tintColorDark,
-    tabIconDefault: '#ccc',
+    tabIconDefault: "#CCCCCC",
     tabIconSelected: tintColorDark,
   },
 };
