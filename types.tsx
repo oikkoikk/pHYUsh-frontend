@@ -35,7 +35,7 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
   NativeStackScreenProps<RootStackParamList>
 >;
 
-export type Sugang = {
+export type TCourseInfo = {
   haksuNo: string;
   suupNo: string;
   gwamokNm: string;
