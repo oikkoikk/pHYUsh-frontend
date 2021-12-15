@@ -1,10 +1,14 @@
 import * as React from "react";
-import { Image, ScrollView, StyleSheet } from "react-native";
+import { FlatList, Image, ListRenderItemInfo, ScrollView, StyleSheet } from "react-native";
 import Header from "../../components/Header";
 import { Text, View } from "../../components/Themed";
 import Colors from "../../constants/Colors";
 import useColorScheme from "../../hooks/useColorScheme";
 import SearchInputBox from "../../components/SearchInputBox";
+import { useRecoilState } from "recoil";
+import { subscribedPushState } from "../../states/PushState";
+import CardView from "../../components/CardView";
+import { TCourseInfo } from "../../types";
 
 const MainScreen = () => {
   const colorScheme = useColorScheme();
@@ -30,7 +34,7 @@ const MainScreen = () => {
   };
 
   const PushList = () => {
-    const [pushState, setPushState] = React.useState([]); // pushState: 현재 신청되어있는 알림
+    const [pushState, setPushState] = useRecoilState(subscribedPushState); // pushState: 현재 신청되어있는 알림
 
     return (
       <View style={{ ...styles.container_push_list, backgroundColor: Colors[colorScheme].gray01 }}>
@@ -38,14 +42,18 @@ const MainScreen = () => {
           <Text style={styles.text_header}>신청한 알림</Text>
         </View>
         {pushState.length === 0 ? (
-          <View style={{ backgroundColor: "transparent", marginTop: 70, alignItems: "center" }}>
+          <View style={{ backgroundColor: "transparent", marginTop: 70, marginBottom: 40, alignItems: "center" }}>
             <Image style={{ height: 250, width: 250 }} source={require("../../assets/images/HYLION_DANCE.png")} />
             <View style={{ backgroundColor: "transparent", marginTop: 10 }}>
               <Text style={{ ...styles.text_header, color: "gray" }}>{"지금 바로 빈자리 알림을 신청해보세요!"}</Text>
             </View>
           </View>
         ) : (
-          <></>
+          <>
+            {pushState.map((course: TCourseInfo) => (
+              <CardView course={course} />
+            ))}
+          </>
         )}
       </View>
     );
@@ -101,7 +109,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
   },
   container_push_list: {
-    height: 500,
+    height: "auto",
     marginTop: 10,
     borderRadius: 18,
   },

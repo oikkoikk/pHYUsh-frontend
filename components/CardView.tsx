@@ -6,8 +6,11 @@ import useColorScheme from "../hooks/useColorScheme";
 import { TCourseInfo } from "../types";
 import { Text, View } from "./Themed";
 import LottieView from "lottie-react-native";
+import Toast from "react-native-toast-message";
+import { checkSubscription, subscribedPushState } from "../states/PushState";
+import { RecoilValue, useRecoilState, useRecoilValue } from "recoil";
 
-const CardView = () => {
+const CardView = ({ course }: { course: TCourseInfo }) => {
   /*
       haksuNo: 학수번호
       suupNo: 수업번호
@@ -19,17 +22,8 @@ const CardView = () => {
     */
 
   const colorScheme = useColorScheme();
-  const mockupData: TCourseInfo = {
-    haksuNo: "CUL3011",
-    suupNo: "15050",
-    gwamokNm: "일반물리학및실험1",
-    daepyoGangsaNm: "김준하",
-    hakjeom: 3,
-    suupTimes: "월화수목금(10:00-12:00),월화수목금(13:00-15:00)",
-    jehanInwon: "42/42",
-  };
 
-  const [currNum, maxNum] = mockupData.jehanInwon.split("/").map((str: string) => +str);
+  const [currNum, maxNum] = course.jehanInwon.split("/").map((str: string) => +str);
   const computeStatus = () => {
     return currNum / maxNum === 1 ? "full" : currNum / maxNum > 0.5 ? "scarce" : "enough";
   };
@@ -38,7 +32,8 @@ const CardView = () => {
   };
 
   const bellRef = React.useRef() as React.MutableRefObject<LottieView>;
-  const [subscribed, setSubscribed] = React.useState(false);
+  const subscribed: boolean = useRecoilValue(checkSubscription(course.suupNo));
+  const [pushState, setPushState] = useRecoilState(subscribedPushState);
   const [status, setStatus] = React.useState(computeStatus());
   const [collapsed, setCollapsed] = React.useState(true);
 
@@ -47,24 +42,78 @@ const CardView = () => {
     else bellRef.current.play(0, 0);
   }, [subscribed, status]);
 
+  const pushToggle = (course: TCourseInfo) => {
+    if (!subscribed) {
+      //푸시 알림 설정
+      setPushState([...pushState, course]);
+    } else {
+      //푸시 알림 해제
+      const temp: TCourseInfo[] = pushState.filter((Pcourse: TCourseInfo) => {
+        return Pcourse.suupNo !== course.suupNo;
+      });
+      setPushState(temp);
+    }
+  };
+
+  const onSubscribe = () => {
+    if(status !== "full"){
+      Toast.show({
+        type: "custom",
+        text1: "잠시만요! 👋",
+        text2: "빈자리 알림은 자리가 없는 강의만 가능해요!",
+      });
+      return;
+    }
+
+    if(pushState.length > 9 && !subscribed){
+      Toast.show({
+        type: "custom",
+        text1: "잠시만요! 👋",
+        text2: "빈자리 알림은 최대 10개까지만 가능해요!",
+      });
+      return;
+    }
+
+    if (!subscribed)
+      Toast.show({
+        type: "custom",
+        text1: "알림 설정 완료 🔔",
+        text2: "빈자리가 생기면 알려드릴게요!",
+      });
+    else
+      Toast.show({
+        type: "custom",
+        text1: "알림 해제 완료 🔔",
+        text2: "알림이 정상적으로 해제되었어요!",
+      });
+    pushToggle(course);
+  };
+
   React.useEffect(() => {
     setStatus(computeStatus());
   }, [currNum]);
 
   return (
     <Pressable onPress={_onPressCard}>
-      <View style={{ ...styles.container, height: collapsed ? 100 : "auto", backgroundColor: Colors[colorScheme].gray01 }}>
+      <View
+        style={{
+          ...styles.container,
+          opacity: status === "full" ? 1 : 0.7,
+          height: collapsed ? 100 : "auto",
+          backgroundColor: Colors[colorScheme].gray01,
+        }}
+      >
         <View style={styles.container_title}>
-          <Text numberOfLines={1} style={styles.text_title}>{`${mockupData.gwamokNm} (${mockupData.haksuNo})`}</Text>
+          <Text numberOfLines={1} style={styles.text_title}>{`${course.gwamokNm} (${course.haksuNo})`}</Text>
         </View>
         <View style={styles.container_detail1}>
-          <Text style={styles.text_detail1}>{mockupData.daepyoGangsaNm}</Text>
+          <Text style={styles.text_detail1}>{course.daepyoGangsaNm}</Text>
         </View>
         <View style={styles.container_detail2}>
-          <Text style={styles.text_detail2}>{`${mockupData.hakjeom}학점 / 수업번호: ${mockupData.suupNo}`}</Text>
+          <Text style={styles.text_detail2}>{`${course.hakjeom}학점 / 수업번호: ${course.suupNo}`}</Text>
         </View>
         <View style={{ ...styles.container_detail2, height: "auto", marginBottom: 15 }}>
-          <Text style={styles.text_detail2}>{`${mockupData.suupTimes.split(",").join("\n")}`}</Text>
+          <Text style={styles.text_detail2}>{`${course.suupTimes.split(",").join("\n")}`}</Text>
         </View>
         <View
           style={{
@@ -72,11 +121,11 @@ const CardView = () => {
             backgroundColor: status === "full" ? "#FF4040" : status === "scarce" ? "#FF7F00" : "#69C779",
           }}
         >
-          <Text style={styles.text_vacancy}>{mockupData.jehanInwon}</Text>
+          <Text style={styles.text_vacancy}>{course.jehanInwon}</Text>
         </View>
         <Pressable
           onPress={() => {
-            setSubscribed(!subscribed);
+            onSubscribe();
           }}
           style={{ ...styles.container_bell, backgroundColor: Colors[colorScheme].gray02 }}
         >

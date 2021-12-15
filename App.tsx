@@ -6,6 +6,8 @@ import Colors from "./constants/Colors";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
+import { RecoilRoot } from "recoil";
+import Loading from "./components/Loading";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -77,11 +79,15 @@ export default function App() {
     return null;
   } else {
     return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-        <Toast position="bottom" onPress={() => Toast.hide()} config={toastConfig} />
-      </SafeAreaProvider>
+      <RecoilRoot>
+        <React.Suspense fallback={<Loading />}>
+          <SafeAreaProvider>
+            <Navigation colorScheme={colorScheme} />
+            <StatusBar />
+            <Toast position="bottom" onPress={() => Toast.hide()} config={toastConfig} />
+          </SafeAreaProvider>
+        </React.Suspense>
+      </RecoilRoot>
     );
   }
 }

@@ -7,31 +7,39 @@ import Layout from "../constants/Layout";
 import useColorScheme from "../hooks/useColorScheme";
 import { View } from "./Themed";
 import Toast from "react-native-toast-message";
+import { CourseState, fetchCourses } from "../states/CourseState";
+import { useSetRecoilState } from "recoil";
 
 const SearchInputBox = ({ onSubmit, searchedInput = "" }: { onSubmit: "navigate" | "search"; searchedInput?: string }) => {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
-  const [input, setInput] = React.useState(""); //input: 검색창의 입력
+  const [input, setInput] = React.useState(searchedInput); //input: 검색창의 입력
+  const setCourses = useSetRecoilState(CourseState);
 
-  const _onSubmit = () => {
+  const _onSubmit = async () => {
     if (input.length <= 1) {
       //두 글자 이상 입력 경고 Toast
       Toast.show({
         type: "custom",
-        text1: "잠시만요!👋",
+        text1: "잠시만요! 👋",
         text2: "검색어는 두 글자 이상 입력해주세요",
       });
       return;
     }
-    if (onSubmit === "navigate") navigation.navigate("SearchScreen", { input: input });
-    //else
+    //API 호출
+    setCourses(await fetchCourses(input));
+    if (onSubmit === "navigate") {
+      navigation.navigate("SearchScreen", { input: input });
+      setInput("");
+    }
   };
 
   return (
     <View style={{ ...styles.container_input, backgroundColor: Colors[colorScheme].gray02 }}>
       <TextInput
-        defaultValue={searchedInput}
+        value={input}
         returnKeyType="search"
+        selectionColor={Colors[colorScheme].tint}
         style={{ ...styles.text_input, color: Colors[colorScheme].text }}
         placeholder={"교과목명을 입력해주세요"}
         placeholderTextColor={"gray"}
@@ -45,7 +53,7 @@ const SearchInputBox = ({ onSubmit, searchedInput = "" }: { onSubmit: "navigate"
       />
       <Ionicons
         name="search"
-        size={24}
+        size={25}
         color="gray"
         style={{ position: "absolute", right: 20 }}
         onPress={() => {
@@ -61,6 +69,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignContent: "space-between",
     height: 50,
+    width: Layout.window.width - 70,
     marginTop: 20,
     borderRadius: 18,
     marginHorizontal: 20,
@@ -68,11 +77,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   text_input: {
-    height: 25,
+    height: 50,
     width: Layout.window.width - 150,
+    fontFamily: "NotoSans-Regular",
     fontWeight: "normal",
+    padding: 0,
+    margin: 0,
     fontSize: 17,
-    lineHeight: 25,
+    lineHeight: 20,
     textAlignVertical: "center",
   },
 });
