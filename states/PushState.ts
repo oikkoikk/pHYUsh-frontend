@@ -1,4 +1,3 @@
-import axios from "axios";
 import { atom, selectorFamily } from "recoil";
 import { TCourseInfo } from "../types";
 
@@ -9,8 +8,8 @@ export const subscribedPushState = atom<TCourseInfo[]>({
 
 export const pushSettingState = atom<boolean>({
   key: "pushSettingState",
-  default: true
-})
+  default: true,
+});
 
 export const checkSubscription = selectorFamily({
   key: "checkSubscription",
