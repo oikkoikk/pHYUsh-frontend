@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Pressable, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import useColorScheme from "../hooks/useColorScheme";
@@ -8,8 +7,8 @@ import { TCourseInfo } from "../types";
 import { Text, View } from "./Themed";
 import LottieView from "lottie-react-native";
 import Toast from "react-native-toast-message";
-import { checkSubscription, subscribedPushState } from "../states/PushState";
-import { RecoilValue, useRecoilState, useRecoilValue } from "recoil";
+import { checkSubscription, subscribedPushState, updatePushState } from "../states/PushState";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 const CardView = ({ course }: { course: TCourseInfo }) => {
   /*
@@ -28,22 +27,23 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
   const computeStatus = () => {
     return currNum / maxNum === 1 ? "full" : currNum / maxNum > 0.5 ? "scarce" : "enough";
   };
-  const _onPressCard = React.useCallback(() => {
+  const _onPressCard = () => {
     setCollapsed(!collapsed);
-  }, []);
+  };
 
   const bellRef = React.useRef() as React.MutableRefObject<LottieView>;
   const subscribed: boolean = useRecoilValue(checkSubscription(course.suupNo));
   const [pushState, setPushState] = useRecoilState(subscribedPushState);
   const [status, setStatus] = React.useState(computeStatus());
   const [collapsed, setCollapsed] = React.useState(true);
+  useRecoilValue(updatePushState); //푸시 알림목록 변경사항 -> asyncStorage에 저장
 
   React.useEffect(() => {
     if (subscribed || status === "full") bellRef.current.play(0, 100);
     else bellRef.current.play(0, 0);
   }, [subscribed, status]);
 
-  const pushToggle = React.useCallback(async (course: TCourseInfo) => {
+  const pushToggle = async (course: TCourseInfo) => {
     if (!subscribed) {
       //푸시 알림 설정
       setPushState([...pushState, course]);
@@ -54,12 +54,9 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
       });
       setPushState(temp);
     }
-    const stringified = JSON.stringify(pushState);
-    await AsyncStorage.setItem("@pushState", stringified);
-    // asyncstorage에 저장
-  }, []);
+  };
 
-  const onSubscribe = React.useCallback(() => {
+  const onSubscribe = () => {
     if (status !== "full") {
       Toast.show({
         type: "custom",
@@ -91,7 +88,7 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
         text2: "알림이 정상적으로 해제되었어요!",
       });
     pushToggle(course);
-  }, []);
+  };
 
   React.useEffect(() => {
     setStatus(computeStatus());

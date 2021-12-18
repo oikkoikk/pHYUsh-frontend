@@ -16,7 +16,7 @@ declare global {
 export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
   NotFound: undefined;
-  SearchScreen: NavigatorScreenParams<SearchNavigateParam> | undefined;
+  SearchScreen: {input: string} | undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, Screen>;
@@ -24,10 +24,6 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 export type RootTabParamList = {
   notification: undefined;
   settings: undefined;
-};
-
-export type SearchNavigateParam = {
-  input: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<

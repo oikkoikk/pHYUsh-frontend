@@ -3,8 +3,8 @@ import { Pressable, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 import Header from "../../components/Header";
 import { Text, View } from "../../components/Themed";
-import { pushSettingState } from "../../states/PushState";
-import { useRecoilState } from "recoil";
+import { pushSettingState, updatePushSettingState } from "../../states/PushState";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 const SettingScreen = () => {
   const ToggleSwitch = React.forwardRef(
@@ -32,6 +32,7 @@ const SettingScreen = () => {
 
   const SettingElement = ({ title, description }: { title: string; description: string }) => {
     const [toggle, setToggle] = useRecoilState(pushSettingState);
+    useRecoilValue(updatePushSettingState);
     const toggleRef = React.useRef() as React.MutableRefObject<LottieView>;
 
     React.useEffect(() => {

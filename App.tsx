@@ -8,8 +8,12 @@ import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
 import { RecoilRoot } from "recoil";
 import Loading from "./components/Loading";
+import { LogBox } from "react-native";
 
-export default function App() {
+function App() {
+
+  LogBox.ignoreLogs(["timer"]);
+  // RN 0.66 버전부터 해결되는 Recoil 관련 에러. (현재는 expo sdk로 인해 해당 버전이 출시되지 않은 상태!)
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
@@ -79,15 +83,21 @@ export default function App() {
     return null;
   } else {
     return (
-      <RecoilRoot>
-        <React.Suspense fallback={<Loading />}>
-          <SafeAreaProvider>
-            <Navigation colorScheme={colorScheme} />
-            <StatusBar />
-            <Toast position="bottom" onPress={() => Toast.hide()} config={toastConfig} />
-          </SafeAreaProvider>
-        </React.Suspense>
-      </RecoilRoot>
+      <React.Suspense fallback={<Loading />}>
+        <SafeAreaProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar />
+          <Toast position="bottom" onPress={() => Toast.hide()} config={toastConfig} />
+        </SafeAreaProvider>
+      </React.Suspense>
     );
   }
+}
+
+export default function _App() {
+  return (
+    <RecoilRoot>
+      <App />
+    </RecoilRoot>
+  );
 }
