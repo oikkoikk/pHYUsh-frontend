@@ -1,14 +1,12 @@
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import * as React from "react";
-import { useSetRecoilState } from "recoil";
-import { pushSettingState, subscribedPushState } from "../states/PushState";
+import { PushStore } from "../stores/PushStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
-  const setPushState = useSetRecoilState(subscribedPushState);
-  const setPushSettingState = useSetRecoilState(pushSettingState);
+  const [state] = React.useState(PushStore);
 
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
@@ -22,17 +20,17 @@ export default function useCachedResources() {
           "NotoSans-Medium": require("../assets/fonts/NotoSansKR-Medium.otf"),
         });
         // Load push states
-        const storedPushState: string | null = await AsyncStorage.getItem("@pushState");
+        const storedPushState: string | null = await AsyncStorage.getItem("@subscribedPushList");
 
         if (storedPushState !== null) {
-          setPushState(JSON.parse(storedPushState));
+          state.subscribedPushList = JSON.parse(storedPushState);
         }
 
         //Load push setting states
-        const storedPushSettingState: string | null = await AsyncStorage.getItem("@pushSettingState");
+        const storedPushSettingState: string | null = await AsyncStorage.getItem("@pushAgree");
 
         if (storedPushSettingState !== null) {
-          setPushSettingState(JSON.parse(storedPushSettingState));
+          state.pushAgree = JSON.parse(storedPushSettingState);
         }
       } catch (e) {
         // We might want to provide this error information to an error reporting service

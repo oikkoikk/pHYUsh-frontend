@@ -7,10 +7,11 @@ import { TCourseInfo } from "../types";
 import { Text, View } from "./Themed";
 import LottieView from "lottie-react-native";
 import Toast from "react-native-toast-message";
-import { checkSubscription, subscribedPushState, updatePushState } from "../states/PushState";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { PushStore } from "../stores/PushStore";
+import { observer } from "mobx-react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CardView = ({ course }: { course: TCourseInfo }) => {
+const CardView = observer(({ course }: { course: TCourseInfo }) => {
   /*
       haksuNo: 학수번호
       suupNo: 수업번호
@@ -32,28 +33,39 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
   };
 
   const bellRef = React.useRef() as React.MutableRefObject<LottieView>;
-  const subscribed: boolean = useRecoilValue(checkSubscription(course.suupNo));
-  const [pushState, setPushState] = useRecoilState(subscribedPushState);
+  const [state] = React.useState(PushStore);
   const [status, setStatus] = React.useState(computeStatus());
   const [collapsed, setCollapsed] = React.useState(true);
-  useRecoilValue(updatePushState); //푸시 알림목록 변경사항 -> asyncStorage에 저장
+  const [subscribed, setSubscribed] = React.useState(false);
 
   React.useEffect(() => {
+    setSubscribed(state.checkSubscription(course.suupNo));
+    //알림 신청 여부 확인
+  }, [state.subscribedPushList]);
+
+  React.useEffect(() => {
+    //알림 신청 여부에 따른 bell 애니메이션
     if (subscribed || status === "full") bellRef.current.play(0, 100);
     else bellRef.current.play(0, 0);
   }, [subscribed, status]);
 
+  const saveSubscribedPushList = async () => {
+    await AsyncStorage.setItem("@subscribedPushList", JSON.stringify(state.subscribedPushList));
+  };
+
   const pushToggle = async (course: TCourseInfo) => {
     if (!subscribed) {
       //푸시 알림 설정
-      setPushState([...pushState, course]);
+      state.setSubscribedPushList([...state.subscribedPushList, course]);
     } else {
       //푸시 알림 해제
-      const temp: TCourseInfo[] = pushState.filter((Pcourse: TCourseInfo) => {
+      const temp: TCourseInfo[] = state.subscribedPushList.filter((Pcourse: TCourseInfo) => {
         return Pcourse.suupNo !== course.suupNo;
       });
-      setPushState(temp);
+      state.setSubscribedPushList(temp);
     }
+    setSubscribed(!subscribed);
+    await saveSubscribedPushList();
   };
 
   const onSubscribe = () => {
@@ -66,7 +78,7 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
       return;
     }
 
-    if (pushState.length > 9 && !subscribed) {
+    if (state.subscribedPushList.length > 9 && !subscribed) {
       Toast.show({
         type: "custom",
         text1: "잠시만요! 👋",
@@ -151,7 +163,7 @@ const CardView = ({ course }: { course: TCourseInfo }) => {
       </View>
     </Pressable>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

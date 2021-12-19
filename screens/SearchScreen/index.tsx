@@ -8,8 +8,7 @@ import Colors from "../../constants/Colors";
 import { Entypo } from "@expo/vector-icons";
 import useColorScheme from "../../hooks/useColorScheme";
 import CardView from "../../components/CardView";
-import { useRecoilValue } from "recoil";
-import { CourseState } from "../../states/CourseState";
+import { CourseStore } from "../../stores/CourseStore";
 import { TCourseInfo } from "../../types";
 
 const SearchScreen = () => {
@@ -18,7 +17,7 @@ const SearchScreen = () => {
   const propInput: string = route.params?.input;
   const navigation = useNavigation();
   const [input, setInput] = React.useState(propInput ? propInput : "");
-  const courses = useRecoilValue(CourseState);
+  const [state] = React.useState(CourseStore);
 
   return (
     <SafeAreaView style={{ ...styles.container, backgroundColor: Colors[colorScheme].background }}>
@@ -36,7 +35,7 @@ const SearchScreen = () => {
         </View>
       </View>
       <View style={{ ...styles.seperator, backgroundColor: Colors[colorScheme].seperator }} />
-      {courses.length === 0 ? (
+      {state.courses.length === 0 ? (
         <View style={{ backgroundColor: "transparent", marginTop: 70, alignItems: "center" }}>
           <Image style={{ height: 250, width: 250 }} source={require("../../assets/images/HYLION_NO_RESULT.png")} />
           <View style={{ backgroundColor: "transparent", marginTop: 10 }}>
@@ -45,7 +44,7 @@ const SearchScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={courses}
+          data={state.courses}
           keyExtractor={(course: TCourseInfo) => course.suupNo}
           renderItem={(course: ListRenderItemInfo<TCourseInfo>) => <CardView course={course.item} />}
           showsVerticalScrollIndicator={false}

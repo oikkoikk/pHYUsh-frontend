@@ -7,62 +7,64 @@ import Layout from "../constants/Layout";
 import useColorScheme from "../hooks/useColorScheme";
 import { View } from "./Themed";
 import Toast from "react-native-toast-message";
-import { CourseState, fetchCourses } from "../states/CourseState";
-import { useSetRecoilState } from "recoil";
+import { CourseStore } from "../stores/CourseStore";
+import { observer } from "mobx-react";
 
-const SearchInputBox = ({ onSubmit, searchedInput = "" }: { onSubmit: "navigate" | "search"; searchedInput?: string }) => {
-  const colorScheme = useColorScheme();
-  const navigation = useNavigation();
-  const [input, setInput] = React.useState(searchedInput); //input: 검색창의 입력
-  const setCourses = useSetRecoilState(CourseState);
+const SearchInputBox = observer(
+  ({ onSubmit, searchedInput = "" }: { onSubmit: "navigate" | "search"; searchedInput?: string }) => {
+    const colorScheme = useColorScheme();
+    const navigation = useNavigation();
+    const [input, setInput] = React.useState(searchedInput); //input: 검색창의 입력
+    const [state] = React.useState(CourseStore);
 
-  const _onSubmit = async () => {
-    if (input.length <= 1) {
-      //두 글자 이상 입력 경고 Toast
-      Toast.show({
-        type: "custom",
-        text1: "잠시만요! 👋",
-        text2: "검색어는 두 글자 이상 입력해주세요",
-      });
-      return;
-    }
-    //API 호출
-    setCourses(await fetchCourses(input));
-    if (onSubmit === "navigate") {
-      navigation.navigate("SearchScreen", { input: input });
-      setInput("");
-    }
-  };
+    const _onSubmit = async () => {
+      if (input.length <= 1) {
+        //두 글자 이상 입력 경고 Toast
+        Toast.show({
+          type: "custom",
+          text1: "잠시만요! 👋",
+          text2: "검색어는 두 글자 이상 입력해주세요",
+        });
+        return;
+      }
+      //API 호출
+      await state.fetchCourses(input);
+      if (onSubmit === "navigate") {
+        navigation.navigate("SearchScreen", { input: input });
+        setInput("");
+      }
+    };
 
-  return (
-    <View style={{ ...styles.container_input, backgroundColor: Colors[colorScheme].gray02 }}>
-      <TextInput
-        value={input}
-        returnKeyType="search"
-        selectionColor={Colors[colorScheme].tint}
-        style={{ ...styles.text_input, color: Colors[colorScheme].text }}
-        placeholder={"교과목명을 입력해주세요"}
-        placeholderTextColor={"gray"}
-        allowFontScaling={false}
-        onChangeText={(value: string) => {
-          setInput(value);
-        }}
-        onSubmitEditing={() => {
-          _onSubmit();
-        }}
-      />
-      <Ionicons
-        name="search"
-        size={25}
-        color="gray"
-        style={{ position: "absolute", right: 20 }}
-        onPress={() => {
-          _onSubmit();
-        }}
-      />
-    </View>
-  );
-};
+    return (
+      <View style={{ ...styles.container_input, backgroundColor: Colors[colorScheme].gray02 }}>
+        <TextInput
+          value={input}
+          returnKeyType="search"
+          selectionColor={Colors[colorScheme].tint}
+          style={{ ...styles.text_input, color: Colors[colorScheme].text }}
+          placeholder={"교과목명을 입력해주세요"}
+          placeholderTextColor={"gray"}
+          allowFontScaling={false}
+          onChangeText={(value: string) => {
+            setInput(value);
+          }}
+          onSubmitEditing={() => {
+            _onSubmit();
+          }}
+        />
+        <Ionicons
+          name="search"
+          size={25}
+          color="gray"
+          style={{ position: "absolute", right: 20 }}
+          onPress={() => {
+            _onSubmit();
+          }}
+        />
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container_input: {

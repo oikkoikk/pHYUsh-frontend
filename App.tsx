@@ -1,21 +1,88 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast, { BaseToast, ErrorToast, BaseToastProps } from "react-native-toast-message";
 import Colors from "./constants/Colors";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
-import { RecoilRoot } from "recoil";
 import Loading from "./components/Loading";
-import { LogBox } from "react-native";
+import { LogBox, Platform } from "react-native";
+import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 function App() {
-
   LogBox.ignoreLogs(["timer"]);
   // RN 0.66 버전부터 해결되는 Recoil 관련 에러. (현재는 expo sdk로 인해 해당 버전이 출시되지 않은 상태!)
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
+  const [expoPushToken, setExpoPushToken] = useState("");
+
+  async function registerForPushNotificationsAsync(): Promise<string> {
+    let token: string = "";
+
+    if (Constants.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        Toast.show({
+          type: "custom",
+          text1: "잠시만요! 👋",
+          text2: "권한에 동의하지 않아 푸시 알림을 받을 수 없어요!",
+        });
+        return token;
+      }
+      token = (await Notifications.getExpoPushTokenAsync()).data;
+      await AsyncStorage.setItem("@pushToken", JSON.stringify(token));
+      alert(token);
+    } else {
+      Toast.show({
+        type: "custom",
+        text1: "잠시만요! 👋",
+        text2: "푸시알림은 실제 단말기에서만 받을 수 있어요!",
+      });
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.deleteNotificationChannelAsync("expo_notifications_fallback_notification_channel");
+      Notifications.setNotificationChannelAsync("default", {
+        name: "빈자리 알림",
+        importance: Notifications.AndroidImportance.MAX,
+      });
+    }
+
+    return token;
+  }
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) => setExpoPushToken(token));
+  }, []);
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener((notification) => {
+      Toast.show({
+        type: "custom",
+        text1: notification.request.content.title as string,
+        text2: notification.request.content.body as string,
+        position: "top",
+        topOffset: 60,
+      });
+    });
+    return () => subscription.remove();
+  }, []);
 
   const toastConfig = {
     success: (props: BaseToastProps) => (
@@ -96,8 +163,8 @@ function App() {
 
 export default function _App() {
   return (
-    <RecoilRoot>
+    <>
       <App />
-    </RecoilRoot>
+    </>
   );
 }

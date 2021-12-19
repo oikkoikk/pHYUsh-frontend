@@ -3,19 +3,19 @@ import { Pressable, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 import Header from "../../components/Header";
 import { Text, View } from "../../components/Themed";
-import { pushSettingState, updatePushSettingState } from "../../states/PushState";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { PushStore } from "../../stores/PushStore";
+import { observer } from "mobx-react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SettingScreen = () => {
-  const ToggleSwitch = React.forwardRef(
-    (
-      { toggle, setToggle }: { toggle: boolean; setToggle: React.Dispatch<React.SetStateAction<boolean>> },
-      toggleRef: React.LegacyRef<LottieView>
-    ) => {
+const SettingScreen = observer(() => {
+  const [state] = React.useState(PushStore);
+
+  const ToggleSwitch = observer(
+    React.forwardRef(({}, toggleRef: React.LegacyRef<LottieView>) => {
       return (
         <Pressable
           onPress={() => {
-            setToggle(!toggle);
+            state.setPushAgree(!state.pushAgree);
           }}
         >
           <LottieView
@@ -27,21 +27,26 @@ const SettingScreen = () => {
           />
         </Pressable>
       );
-    }
+    })
   );
 
-  const SettingElement = ({ title, description }: { title: string; description: string }) => {
-    const [toggle, setToggle] = useRecoilState(pushSettingState);
-    useRecoilValue(updatePushSettingState);
+  const SettingElement = observer(({ title, description }: { title: string; description: string }) => {
     const toggleRef = React.useRef() as React.MutableRefObject<LottieView>;
 
     React.useEffect(() => {
-      if (toggle) {
+      if (state.pushAgree) {
         toggleRef.current.play(0, 20);
       } else {
         toggleRef.current.play(90, 110);
       }
-    }, [toggle]);
+      (async () => {
+        await savePushAgree();
+      })();
+    }, [state.pushAgree]);
+
+    const savePushAgree = async () => {
+      await AsyncStorage.setItem("@pushAgree", JSON.stringify(state.pushAgree));
+    };
 
     return (
       <View style={styles.container_setting}>
@@ -49,10 +54,10 @@ const SettingScreen = () => {
           <Text style={styles.text_title}>{title}</Text>
           <Text style={styles.text_description}>{description}</Text>
         </View>
-        <ToggleSwitch ref={toggleRef} toggle={toggle} setToggle={setToggle} />
+        <ToggleSwitch ref={toggleRef} />
       </View>
     );
-  };
+  });
 
   return (
     <>
@@ -65,7 +70,7 @@ const SettingScreen = () => {
       </View>
     </>
   );
-};
+});
 
 export default SettingScreen;
 

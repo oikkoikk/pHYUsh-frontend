@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "186013165938",
+    "project_id": "phyush-9d121",
+    "storage_bucket": "phyush-9d121.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186013165938:android:833ae730e8cf2249db95eb",
+        "android_client_info": {
+          "package_name": "com.pHYUshcompany.pHYUsh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "186013165938-vjc4u0f8idk410tltahc9bqdol177o3e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDp0b16mmVUHj1YL0NSLaJtyDpWVJxzjns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "186013165938-vjc4u0f8idk410tltahc9bqdol177o3e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
