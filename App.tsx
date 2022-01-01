@@ -8,7 +8,7 @@ import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
 import Loading from "./components/Loading";
-import { LogBox, Platform } from "react-native";
+import { Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 
@@ -20,9 +20,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-function App() {
-  LogBox.ignoreLogs(["timer"]);
-  // RN 0.66 버전부터 해결되는 Recoil 관련 에러. (현재는 expo sdk로 인해 해당 버전이 출시되지 않은 상태!)
+export default function App() {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
   const [expoPushToken, setExpoPushToken] = useState("");
@@ -48,6 +46,7 @@ function App() {
       token = (await Notifications.getExpoPushTokenAsync()).data;
       await AsyncStorage.setItem("@pushToken", JSON.stringify(token));
       alert(token);
+      console.log(token);
     } else {
       Toast.show({
         type: "custom",
@@ -159,12 +158,4 @@ function App() {
       </React.Suspense>
     );
   }
-}
-
-export default function _App() {
-  return (
-    <>
-      <App />
-    </>
-  );
 }

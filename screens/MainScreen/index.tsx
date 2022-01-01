@@ -11,10 +11,18 @@ import { PushStore } from "../../stores/PushStore";
 import CardView from "../../components/CardView";
 import { TCourseInfo } from "../../types";
 import { observer } from "mobx-react";
+import { CourseStore } from "../../stores/CourseStore";
 
 const MainScreen = observer(() => {
   const colorScheme = useColorScheme();
-  const [state] = React.useState(PushStore);
+  const [pushState] = React.useState(PushStore);
+  const [courseState] = React.useState(CourseStore);
+  const fetchLimitCourses = async () => {
+    await courseState.fetchLimitCourses();
+  };
+  React.useEffect(() => {
+    fetchLimitCourses();
+  }, []);
 
   const SemesterInfo = observer(() => {
     const semester = "";
@@ -23,6 +31,34 @@ const MainScreen = observer(() => {
       <View style={styles.container_info}>
         <Text style={styles.text_info}>{semester === "" ? "학기 정보가 없어요 💦" : "semester"}</Text>
       </View>
+    );
+  });
+
+  const LimitList = observer(() => {
+    const opacity = React.useRef(new Animated.Value(0)).current;
+    const visibleAnim = Animated.timing(opacity, {
+      toValue: 1,
+      duration: 600,
+      delay: 0,
+      useNativeDriver: false,
+    });
+    React.useEffect(() => {
+      visibleAnim.start();
+    }, []);
+    
+    return (
+      <Animated.View
+        style={{ ...styles.container_push_list, opacity: opacity, backgroundColor: Colors[colorScheme].gray01, marginBottom: 10 }}
+      >
+        <View style={styles.container_header}>
+          <Text style={styles.text_header}>마감 임박!</Text>
+        </View>
+        {courseState.limitCourses.slice(0, 1).map((course: TCourseInfo, index: number) => (
+          <View style={styles.container_card_view} key={`${course.suupNo}_subscribed_${index}`}>
+            <CardView course={course} />
+          </View>
+        ))}
+      </Animated.View>
     );
   });
 
@@ -43,7 +79,7 @@ const MainScreen = observer(() => {
         <View style={styles.container_header}>
           <Text style={styles.text_header}>신청한 알림</Text>
         </View>
-        {state.subscribedPushList.length === 0 ? (
+        {pushState.subscribedPushList.length === 0 ? (
           <View style={{ backgroundColor: "transparent", marginTop: 70, marginBottom: 40, alignItems: "center" }}>
             <Image style={{ height: 250, width: 250 }} source={require("../../assets/images/HYLION_DANCE.png")} />
             <View style={{ backgroundColor: "transparent", marginTop: 10 }}>
@@ -52,7 +88,7 @@ const MainScreen = observer(() => {
           </View>
         ) : (
           <>
-            {state.subscribedPushList.map((course: TCourseInfo, index: number) => (
+            {pushState.subscribedPushList.map((course: TCourseInfo, index: number) => (
               <View style={styles.container_card_view} key={`${course.suupNo}_subscribed_${index}`}>
                 <CardView course={course} />
               </View>
@@ -96,7 +132,7 @@ const MainScreen = observer(() => {
         <View style={styles.container_header}>
           <Text style={styles.text_header}>혹시 놓치셨나요?</Text>
         </View>
-        {state.subscribedPushList.slice(0, 1).map((course: TCourseInfo, index: number) => (
+        {pushState.subscribedPushList.slice(0, 1).map((course: TCourseInfo, index: number) => (
           <View style={styles.container_card_view} key={`${course.suupNo}_received_${index}`}>
             <CardView course={course} />
           </View>
@@ -111,6 +147,7 @@ const MainScreen = observer(() => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 40 }}>
         <SemesterInfo />
         {/*<ReceivedPush />*/}
+        {courseState.limitCourses.length > 0 ? <LimitList /> : <></>}
         <SearchBox />
         <PushList />
       </ScrollView>

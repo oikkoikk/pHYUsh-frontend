@@ -20,7 +20,7 @@ export default function useCachedResources() {
           "NotoSans-Medium": require("../assets/fonts/NotoSansKR-Medium.otf"),
         });
         // Load push states
-        const storedPushState: string | null = await AsyncStorage.getItem("@subscribedPushList");
+         const storedPushState: string | null = await AsyncStorage.getItem("@subscribedPushList");
 
         if (storedPushState !== null) {
           state.subscribedPushList = JSON.parse(storedPushState);

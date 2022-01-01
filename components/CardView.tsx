@@ -19,14 +19,18 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
       daepyoGangsaNm: 교강사명
       hakjeom: 학점
       suupTimes: 수업시간(string을 ,로 구분)
-      jehanInwon: 제한인원(ex."42/42")
+      currentInwon: 현재 인원
+      limitInwon: 전체 인원(가용 인원)
     */
 
   const colorScheme = useColorScheme();
 
-  const [currNum, maxNum] = course.jehanInwon.split("/").map((str: string) => +str);
   const computeStatus = () => {
-    return currNum / maxNum === 1 ? "full" : currNum / maxNum > 0.5 ? "scarce" : "enough";
+    return +course.currentInwon / +course.limitInwon >= 1
+      ? "full"
+      : +course.currentInwon / +course.limitInwon > 0.5
+      ? "scarce"
+      : "enough";
   };
   const _onPressCard = () => {
     setCollapsed(!collapsed);
@@ -48,6 +52,10 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
     if (subscribed || status === "full") bellRef.current.play(0, 100);
     else bellRef.current.play(0, 0);
   }, [subscribed, status]);
+
+  React.useEffect(() => {
+    setStatus(computeStatus());
+  }, [course.currentInwon]);
 
   const saveSubscribedPushList = async () => {
     await AsyncStorage.setItem("@subscribedPushList", JSON.stringify(state.subscribedPushList));
@@ -102,10 +110,6 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
     pushToggle(course);
   };
 
-  React.useEffect(() => {
-    setStatus(computeStatus());
-  }, [currNum]);
-
   return (
     <Pressable onPress={_onPressCard}>
       <View
@@ -134,7 +138,7 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
             backgroundColor: status === "full" ? "#FF4040" : status === "scarce" ? "#FF7F00" : "#69C779",
           }}
         >
-          <Text style={styles.text_vacancy}>{course.jehanInwon}</Text>
+          <Text style={styles.text_vacancy}>{`${course.currentInwon}명 / ${course.limitInwon}명`}</Text>
         </View>
         <Pressable
           onPress={() => {
@@ -223,9 +227,9 @@ const styles = StyleSheet.create({
   text_vacancy: {
     fontFamily: "NotoSans-Medium",
     fontWeight: "normal",
-    lineHeight: 30,
+    lineHeight: 19,
     color: "#FFFFFF",
-    fontSize: 20,
+    fontSize: 15,
   },
   container_bell: {
     position: "absolute",

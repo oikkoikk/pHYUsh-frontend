@@ -32,11 +32,12 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
 >;
 
 export type TCourseInfo = {
-  haksuNo: string;
   suupNo: string;
+  haksuNo: string;
   gwamokNm: string;
   daepyoGangsaNm: string;
   hakjeom: number;
   suupTimes: string;
-  jehanInwon: string;
+  currentInwon: string;
+  limitInwon: string;
 };

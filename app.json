@@ -7,11 +7,20 @@
     "icon": "./assets/images/icon.png",
     "scheme": "phyush",
     "userInterfaceStyle": "automatic",
+    "primaryColor": "#0E4A84",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/push_icon.png"
+        }
+      ]
+    ],
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -24,7 +33,11 @@
     "android": {
       "package": "com.pHYUshcompany.pHYUsh",
       "versionCode": 1,
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage" : "./assets/images/adaptive_foreground_icon.png",
+        "backgroundColor" : "#FFFFFF"
+      }
     }
   }
 }

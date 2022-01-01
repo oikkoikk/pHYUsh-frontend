@@ -10,8 +10,9 @@ import useColorScheme from "../../hooks/useColorScheme";
 import CardView from "../../components/CardView";
 import { CourseStore } from "../../stores/CourseStore";
 import { TCourseInfo } from "../../types";
+import { observer } from "mobx-react";
 
-const SearchScreen = () => {
+const SearchScreen = observer(() => {
   const colorScheme = useColorScheme();
   const route = useRoute();
   const propInput: string = route.params?.input;
@@ -52,7 +53,7 @@ const SearchScreen = () => {
       )}
     </SafeAreaView>
   );
-};
+});
 
 export default SearchScreen;
 
