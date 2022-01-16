@@ -18,6 +18,7 @@ import SettingScreen from "../screens/SettingScreen";
 import SearchScreen from "../screens/SearchScreen";
 import { RootStackParamList, RootTabParamList } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import LimitedScreen from "../screens/LimitedScreen";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -39,6 +40,7 @@ function RootNavigator() {
       <Stack.Screen name="Root" component={BottomTabNavigator} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Oops!" }} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
+      <Stack.Screen name="LimitedScreen" component={LimitedScreen} />
     </Stack.Navigator>
   );
 }

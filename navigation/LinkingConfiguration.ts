@@ -28,6 +28,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       SearchScreen: {},
+      LimitedScreen: {},
       NotFound: "*",
     },
   },

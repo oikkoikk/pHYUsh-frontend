@@ -43,15 +43,15 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
   const [subscribed, setSubscribed] = React.useState(false);
 
   React.useEffect(() => {
-    setSubscribed(state.checkSubscription(course.suupNo));
-    //알림 신청 여부 확인
-  }, [state.subscribedPushList]);
-
-  React.useEffect(() => {
     //알림 신청 여부에 따른 bell 애니메이션
     if (subscribed || status === "full") bellRef.current.play(0, 100);
     else bellRef.current.play(0, 0);
   }, [subscribed, status]);
+
+ React.useEffect(() => {
+   setSubscribed(state.checkSubscription(course.suupNo));
+   //알림 신청 여부 확인
+ }, []);
 
   React.useEffect(() => {
     setStatus(computeStatus());
@@ -146,23 +146,15 @@ const CardView = observer(({ course }: { course: TCourseInfo }) => {
           }}
           style={{ ...styles.container_bell, backgroundColor: Colors[colorScheme].gray02 }}
         >
-          {subscribed === false && status === "full" ? (
-            <LottieView
-              ref={bellRef}
-              autoPlay={true}
-              loop={true}
-              source={require("../assets/lotties/bell_disabled.json")}
-              style={styles.bell}
-            />
-          ) : (
-            <LottieView
-              ref={bellRef}
-              autoPlay={false}
-              loop={false}
-              source={!subscribed ? require("../assets/lotties/bell_disabled.json") : require("../assets/lotties/bell.json")}
-              style={styles.bell}
-            />
-          )}
+          <LottieView
+            ref={bellRef}
+            autoPlay={subscribed === false && status === "full" ? true : false}
+            loop={subscribed === false && status === "full" ? true : false}
+            source={
+              subscribed === false ? require("../assets/lotties/bell_disabled.json") : require("../assets/lotties/bell.json")
+            }
+            style={styles.bell}
+          />
         </Pressable>
       </View>
     </Pressable>

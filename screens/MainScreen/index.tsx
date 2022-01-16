@@ -3,6 +3,7 @@ import { Animated, Image, ScrollView, StyleSheet } from "react-native";
 //import * as Application from "expo-application";
 //import * as IntentLauncher from "expo-intent-launcher";
 import Header from "../../components/Header";
+import { Entypo } from "@expo/vector-icons";
 import { Text, View } from "../../components/Themed";
 import Colors from "../../constants/Colors";
 import useColorScheme from "../../hooks/useColorScheme";
@@ -12,9 +13,11 @@ import CardView from "../../components/CardView";
 import { TCourseInfo } from "../../types";
 import { observer } from "mobx-react";
 import { CourseStore } from "../../stores/CourseStore";
+import { useNavigation } from "@react-navigation/native";
 
 const MainScreen = observer(() => {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
   const [pushState] = React.useState(PushStore);
   const [courseState] = React.useState(CourseStore);
   const fetchLimitCourses = async () => {
@@ -45,13 +48,16 @@ const MainScreen = observer(() => {
     React.useEffect(() => {
       visibleAnim.start();
     }, []);
-    
+
     return (
       <Animated.View
         style={{ ...styles.container_push_list, opacity: opacity, backgroundColor: Colors[colorScheme].gray01, marginBottom: 10 }}
       >
-        <View style={styles.container_header}>
-          <Text style={styles.text_header}>마감 임박!</Text>
+        <View style={{ ...styles.container_header, flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginRight: 20 }}>
+          <View style={{backgroundColor: "transparent", height: 30}}>
+            <Text style={styles.text_header}>마감 임박!</Text>
+          </View>
+          <Entypo name="chevron-thin-right" size={22} color="gray" onPress={() => {navigation.navigate("LimitedScreen")}} />
         </View>
         {courseState.limitCourses.slice(0, 1).map((course: TCourseInfo, index: number) => (
           <View style={styles.container_card_view} key={`${course.suupNo}_subscribed_${index}`}>

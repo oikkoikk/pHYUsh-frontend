@@ -45,6 +45,7 @@ const SearchScreen = observer(() => {
         </View>
       ) : (
         <FlatList
+          contentContainerStyle={{paddingVertical: 20}}
           data={state.courses}
           keyExtractor={(course: TCourseInfo) => course.suupNo}
           renderItem={(course: ListRenderItemInfo<TCourseInfo>) => <CardView course={course.item} />}
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   },
   seperator: {
     height: 1,
-    marginVertical: 15,
+    marginTop: 15,
   },
   text_info: {
     fontFamily: "NotoSans-Medium",
